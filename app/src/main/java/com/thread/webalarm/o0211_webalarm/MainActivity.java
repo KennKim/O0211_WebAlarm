@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             tv2.setText(strTest);
 
 
-            Toast.makeText(MainActivity.this, strTest + "-aHandler : " + aa, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, strTest + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
             aa++;
             this.sendEmptyMessageDelayed(Atest, REPEAT_DELAY);        // REPEAT_DELAY 간격으로 계속해서 반복하게 만들어준다
         }

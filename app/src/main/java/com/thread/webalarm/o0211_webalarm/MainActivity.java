@@ -1,19 +1,26 @@
 package com.thread.webalarm.o0211_webalarm;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
@@ -30,42 +37,46 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
-    private String strTest="";
+
+    private BackPressCloseHandler backPressCloseHandler;
+    private Dialog mMainDialog;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
+    private String strCount = "";
 
     private WebView webView;
-    private ProgressDialog progressBar;
+    private ProgressDialog proDialog;
 
-    private EditText et;
-    private Button btn1;
-    private Button btn2;
-    private Button btn3;
-    private Button btn4;
-    private Button btn5;
-    private TextView tv2;
-    private CheckBox checkBox;
-    private CheckBox checkBox2;
+    private EditText etSearch;
+    private Button btnGo;
+    private Button btnGetHtml;
+    private Button btnStop;
+    private TextView tvResult;
+    private TextView tvNo;
+    private TextView tvNo2;
+    private TextView tvGetUrl;
+    private CheckBox cboxWeb;
+    private CheckBox cboxZero;
 
-    private String address = "http://www.pgi88.com";
+    private static String firstUrl = "http://www.pgi88.com";
     private LinearLayout linear;
 
     private final String TAG = "tag";
     private final String HTML = "myHtml";
 
     private MediaPlayer mp;
+    private Vibrator vib;
 
-
-    Handler myHandler = new Handler();
-
-    Handler handler = new Handler() {
+    Handler handSource = new Handler() {
         public void handleMessage(Message msg) {
             Bundle bun = msg.getData();
-            String naverHtml = bun.getString(HTML);
-            tv2.setText(naverHtml);
+            String strHtml = bun.getString(HTML);
+            tvGetUrl.setText(strHtml);
         }
     };
 
-    public final static int REPEAT_DELAY = 15000;
-    public final static int Atest = 1;
+    public final static int A_DELAY = 6000;
+    public final static int A_NO = 1;
     int aa = 0;
     Handler aHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -73,14 +84,29 @@ public class MainActivity extends AppCompatActivity {
 
             // 할일들을 여기에 등록
 
-            et.setText(webView.getUrl());
+            tvGetUrl.setText(webView.getUrl());
+            tvNo.setText("" + aa++);
             myHtml();
-            tv2.setText(strTest);
+            tvResult.setText(strCount);
 
+            Toast.makeText(MainActivity.this, strCount + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
+            this.sendEmptyMessageDelayed(A_NO, A_DELAY);        // A_DELAY 간격으로 계속해서 반복하게 만들어준다
+        }
+    };
 
-            Toast.makeText(MainActivity.this, strTest + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
-            aa++;
-            this.sendEmptyMessageDelayed(Atest, REPEAT_DELAY);        // REPEAT_DELAY 간격으로 계속해서 반복하게 만들어준다
+    public final static int B_DELAY = 600000;
+    public final static int B_NO = 2;
+    int bb = 0;
+    Handler bHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            // 할일들을 여기에 등록
+            startWebView(getEtUrl());
+            tvNo2.setText("" + bb++);
+
+            Toast.makeText(MainActivity.this, strCount + "-Re : " + bb, Toast.LENGTH_LONG).show();
+            this.sendEmptyMessageDelayed(B_NO, B_DELAY);        // B_DELAY 간격으로 계속해서 반복하게 만들어준다
         }
     };
 
@@ -89,7 +115,44 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        startWebView();
+        backPressCloseHandler = new BackPressCloseHandler(this);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Toast.makeText(MainActivity.this, strCount + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
+                startWebView("http://www.naver.com");
+                swipeRefreshLayout.setRefreshing(false);
+
+            }
+        });
+//                색상 변경
+//        swipeRefreshLayout.setColorSchemeResources(
+//                android.R.color.holo_blue_bright,
+//                android.R.color.holo_green_light,
+//                android.R.color.holo_orange_light,
+//                android.R.color.holo_red_light);
+
+        webView = (WebView) findViewById(R.id.webView1);
+
+        webView.setWebViewClient(new WebViewClient()); // 이걸 안해주면 새창이 뜸
+
+
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.getSettings().setBuiltInZoomControls(true);
+        webView.getSettings().setSupportZoom(true);
+        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+
+
+        webView.getSettings().setLoadWithOverviewMode(true);
+        webView.getSettings().setUseWideViewPort(true);
+
+
+        etSearch = (EditText) findViewById(R.id.editText1);
+        etSearch.setText(firstUrl);
+
+        startWebView(getEtUrl());
 
 //
 //        MyThread myThread = new MyThread();
@@ -97,25 +160,27 @@ public class MainActivity extends AppCompatActivity {
 
 
         mp = MediaPlayer.create(MainActivity.this, R.raw.sound_sky);
+        mp.setAudioStreamType(AudioManager.STREAM_RING);
+
+        vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
 
 //        webView.loadUrl(url);
 //		 InputMethodManager immhide = (InputMethodManager) getSystemService(getApplication().INPUT_METHOD_SERVICE);
 //		 immhide.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0);
 
-        btn1 = (Button) findViewById(R.id.btn1);
-        btn1.setOnClickListener(new View.OnClickListener() {
+        btnGo = (Button) findViewById(R.id.btnGo);
+        btnGo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                webView.loadUrl(getModiUrl());
-
+                startWebView(getEtUrl());
             }
         });
-        btn2 = (Button) findViewById(R.id.btn2);
-        btn2.setOnClickListener(new View.OnClickListener() {
+        btnGetHtml = (Button) findViewById(R.id.btnGetHtml);
+        btnGetHtml.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                et.setText(webView.getUrl());
+                tvGetUrl.setText(webView.getUrl());
 //                Toast.makeText(MainActivity.this, webView.getUrl(), Toast.LENGTH_SHORT).show();
 
                 // Thread로 웹서버에 접속
@@ -125,38 +190,17 @@ public class MainActivity extends AppCompatActivity {
 
                         Bundle bun = new Bundle();
                         bun.putString(HTML, naverHtml);
-                        Message msg = handler.obtainMessage();
+                        Message msg = handSource.obtainMessage();
                         msg.setData(bun);
-                        handler.sendMessage(msg);
+                        handSource.sendMessage(msg);
                     }
                 }.start();
             }
         });
 
-        btn3 = (Button) findViewById(R.id.btn3);
-        btn3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                et.setText(webView.getUrl());
-                myHtml();
-                tv2.setText(strTest);
-            }
-        });
 
-        btn4 = (Button) findViewById(R.id.btn4);
-        btn4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (strTest.equals("0")) {
-                    playMp3();
-                } else {
-                    Toast.makeText(MainActivity.this, strTest + "- not same! -" + strTest.length(), Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        btn5 = (Button) findViewById(R.id.btn5);
-        btn5.setOnClickListener(new View.OnClickListener() {
+        btnStop = (Button) findViewById(R.id.btnStop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stopMp3();
@@ -164,8 +208,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        tv2 = (TextView) findViewById(R.id.tv2);
-        tv2.addTextChangedListener(new TextWatcher() {
+        tvResult = (TextView) findViewById(R.id.tvResult);
+        tvResult.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -176,8 +220,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (strTest.equals("1") ||strTest.equals("2") ||strTest.equals("3") ||strTest.equals("4") ||strTest.equals("5")) {
+                if (strCount.equals("1") || strCount.equals("2") || strCount.equals("3") || strCount.equals("4") || strCount.equals("5")) {
                     playMp3();
+                    startVib();
 
                 } else {
 //                    Toast.makeText(MainActivity.this, "stopMp3", Toast.LENGTH_SHORT).show();
@@ -187,59 +232,90 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        tvGetUrl = (TextView) findViewById(R.id.tvGetUrl);
+        tvNo = (TextView) findViewById(R.id.tvNo);
+        tvNo2 = (TextView) findViewById(R.id.tvNo2);
 
-        checkBox = (CheckBox) findViewById(R.id.checkBox);
-        checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+        cboxZero = (CheckBox) findViewById(R.id.cboxZero);
+        cboxZero.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    tvResult.setText("start!");
+                    aHandler.sendEmptyMessage(A_NO);
+                    bHandler.sendEmptyMessage(B_NO);
+                } else {
+                    tvResult.setText("STOP..");
+                    aHandler.removeMessages(A_NO);
+                    bHandler.removeMessages(B_NO);
+                }
+            }
+        });
+
+
+        cboxWeb = (CheckBox) findViewById(R.id.cboxWeb);
+        cboxWeb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+
                     playMp3();
+                    startVib();
+
+                    String userAgent = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.4) Gecko/20100101 Firefox/4.0";
+                    webView.getSettings().setUserAgentString(userAgent);
+
+                    startWebView(webView.getUrl());
+
+                    cboxWeb.setText("Web");
+
+//                    String userAgent = webView.getSettings().getUserAgentString().replace("Mobile ","");
+//                    webView.getSettings().setUserAgentString(userAgent);
+
+//                    String ua = "Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.4) Gecko/20100101 Firefox/4.0";
+//                    webView.getSettings().setUserAgentString(ua);
+//                    startWebView(webView.getUrl());
+
                 } else {
                     stopMp3();
+
+                    String userAgent = "Android";
+                    webView.getSettings().setUserAgentString(userAgent);
+
+                    startWebView(webView.getUrl());
+                    cboxWeb.setText("Mob");
+
+//                    String userAgent = webView.getSettings().getUserAgentString().replace("Mozila ", "");
+//                    webView.getSettings().setUserAgentString(userAgent);
                 }
             }
         });
-
-        checkBox2 = (CheckBox) findViewById(R.id.checkBox2);
-        checkBox2.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    tv2.setText("start!");
-                    aHandler.sendEmptyMessage(Atest);
-                } else {
-                    tv2.setText("STOP..");
-                    aHandler.removeMessages(Atest);
-                }
-            }
-        });
-
 
     }
 
 
-    private void startWebView() {
+    @Override
+    public void onBackPressed() {
+        backPressCloseHandler.onBackPressed();
+    }
 
-        webView = (WebView) findViewById(R.id.webView1);
-
-        webView.setWebViewClient(new WebViewClient()); // 이걸 안해주면 새창이 뜸
-
-        et = (EditText) findViewById(R.id.editText1);
-        et.setText(address);
-        String url = et.getText().toString();
-
-
-        //REDIRECT ADDRESS
-        //REDIRECT ADDRESS
-        //REDIRECT ADDRESS
-
-        WebSettings settings = webView.getSettings();
-        settings.setJavaScriptEnabled(true);
-        webView.setScrollBarStyle(WebView.SCROLLBARS_OUTSIDE_OVERLAY);
+    private void startWebView(String url) {
 
         final AlertDialog alertDialog = new AlertDialog.Builder(this).create();
 
-        progressBar = ProgressDialog.show(MainActivity.this, "WebView Example", "Loading...");
+//        proDialog = ProgressDialog.show(MainActivity.this, "WebView Example", "Loading...");
+
+        proDialog = new ProgressDialog(MainActivity.this);
+        proDialog.setMessage("Loading...");
+        proDialog.setCancelable(false);
+        proDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        proDialog.show();
 
         webView.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -250,8 +326,8 @@ public class MainActivity extends AppCompatActivity {
 
             public void onPageFinished(WebView view, String url) {
                 Log.i(TAG, "Finished loading URL: " + url);
-                if (progressBar.isShowing()) {
-                    progressBar.dismiss();
+                if (MainActivity.this.proDialog.isShowing()) {
+                    MainActivity.this.proDialog.dismiss();
                 }
             }
 
@@ -270,21 +346,40 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        webView.loadUrl(getModiUrl());
+        webView.loadUrl(url);
+    }
+
+    public void startService() {
+        Intent intent = new Intent(MainActivity.this, ServiceWithWebview.class);
+        intent.putExtra("Test", "test");
+        startService(intent);
+    }
+
+    public void stopService() {
+        Intent intent = new Intent(MainActivity.this, ServiceWithWebview.class);
+        stopService(intent);
     }
 
     public void playMp3() {
-        try {
-            if (!mp.isPlaying()) {
-                mp.stop();
-                mp.release();
-                mp = MediaPlayer.create(MainActivity.this, R.raw.sound_sky);
-                mp.start();
-            } else {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+//        am.getRingerMode() == AudioManager.RINGER_MODE_SILENT
+//        am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE
+
+        if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+            Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            try {
+                if (!mp.isPlaying()) {
+                    mp.stop();
+                    mp.release();
+                    mp = MediaPlayer.create(getApplicationContext(), uri);
+                    mp.start();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } else {
         }
+
     }
 
     public void stopMp3() {
@@ -293,17 +388,23 @@ public class MainActivity extends AppCompatActivity {
                 mp.stop();
                 mp.release();
                 mp = MediaPlayer.create(MainActivity.this, R.raw.sound_sky);
-            }else{
-
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public void startVib() {
+        AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL || am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE) {
+            long[] pattern = {0, 500, 100, 40, 100, 40, 100, 40, 100, 800, 100};
+            vib.vibrate(pattern, -1);
+        }
+    }
 
-    public String getModiUrl() {
-        String url = et.getText().toString();
+
+    public String getEtUrl() {
+        String url = etSearch.getText().toString();
 //        Toast.makeText(MainActivity.this, url, Toast.LENGTH_SHORT).show();
         return url;
     }
@@ -318,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
         BufferedReader br = null;
 
         try {
-            String address = et.getText().toString();
+            String address = etSearch.getText().toString();
             url = new URL(address);
             http = (HttpURLConnection) url.openConnection();
             http.setConnectTimeout(3 * 1000);
@@ -380,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
         webView.addJavascriptInterface(new MyJavascriptInterface(), "Android");
 
 
-        webView.loadUrl(getModiUrl());
+        webView.loadUrl(webView.getUrl());
 
 
     }
@@ -390,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void getHtml(String html) { //위 자바스크립트가 호출되면 여기로 html이 반환됨
             System.out.println(html);
-            strTest = html.trim();
+            strCount = html.trim();
         }
     }
 

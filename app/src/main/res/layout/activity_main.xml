@@ -20,34 +20,24 @@
             android:layout_height="wrap_content"
             android:layout_weight="3"
             android:ems="10"
+            android:gravity="left|center_vertical"
             android:hint="adress"
             android:imeOptions="actionGo"
             android:singleLine="true"
-            android:textSize="10sp"></EditText>
+            android:textSize="12sp"></EditText>
 
         <Button
-            android:id="@+id/btn1"
+            android:id="@+id/btnGo"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:text="A" />
 
         <Button
-            android:id="@+id/btn2"
+            android:id="@+id/btnGetHtml"
             android:layout_width="50dp"
             android:layout_height="wrap_content"
             android:text="B" />
 
-        <Button
-            android:id="@+id/btn3"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="C" />
-
-        <Button
-            android:id="@+id/btn4"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:text="D" />
     </LinearLayout>
 
     <LinearLayout
@@ -55,53 +45,92 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <CheckBox
-            android:id="@+id/checkBox2"
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvNo"
+            android:layout_width="50dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:background="#fde0e0"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="Count" />
+
+        <TextView
+            android:id="@+id/tvNo2"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:background="#fde0e0"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="Refresh" />
+
+        <CheckBox
+            android:id="@+id/cboxZero"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="aHandler" />
 
         <CheckBox
-            android:id="@+id/checkBox"
-            android:layout_width="match_parent"
+            android:id="@+id/cboxWeb"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="MpTest" />
+            android:text="Web" />
 
         <Button
-            android:id="@+id/btn5"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Stop" />
+            android:id="@+id/btnStop"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:text="Stop"
+            android:textSize="12sp" />
     </LinearLayout>
 
-    <WebView
-        android:id="@+id/webView1"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:background="#ea3a1a" />
+        android:layout_height="wrap_content"
+        android:elevation="1dp"
+        android:orientation="horizontal">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="300dp">
-
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/tv2"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="#fde0e0"
-                android:text="TextView" />
+                android:orientation="vertical">
 
+                <TextView
+                    android:id="@+id/tvGetUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="#3328eefc"
+                    android:gravity="left|center_vertical"
+                    android:maxHeight="100dp"
+                    android:text="GetUrl" />
+            </LinearLayout>
+        </ScrollView>
 
-        </LinearLayout>
-    </ScrollView>
+        <TextView
+            android:id="@+id/tvResult"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="#fde0e0"
+            android:gravity="center_vertical|center_horizontal"
+            android:text="77" />
+    </LinearLayout>
 
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <WebView
+            android:id="@+id/webView1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ea3a1a"
+            android:focusable="true"
+            android:focusableInTouchMode="true" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
 </LinearLayout>

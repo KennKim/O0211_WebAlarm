@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Alarm</string>
+    <string name="service_name">ImService</string>
 </resources>

@@ -2,10 +2,16 @@ package com.thread.webalarm.o0211_webalarm;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -16,6 +22,7 @@ import android.os.Message;
 import android.os.Vibrator;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -51,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnGo;
     private Button btnGetHtml;
     private Button btnStop;
+    private Button btnC;
     private TextView tvResult;
     private TextView tvNo;
     private TextView tvNo2;
@@ -78,15 +86,15 @@ public class MainActivity extends AppCompatActivity {
     public final static int A_DELAY = 6000;
     public final static int A_NO = 1;
     int aa = 0;
+    String aHanUrl;
     Handler aHandler = new Handler() {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
             // 할일들을 여기에 등록
-
             tvGetUrl.setText(webView.getUrl());
             tvNo.setText("" + aa++);
-            myHtml();
+            myHtml(aHanUrl);
             tvResult.setText(strCount);
 
             Toast.makeText(MainActivity.this, strCount + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
@@ -94,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public final static int B_DELAY = 600000;
+    public final static int B_DELAY = 1200000;
     public final static int B_NO = 2;
     int bb = 0;
     Handler bHandler = new Handler() {
@@ -105,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
             startWebView(getEtUrl());
             tvNo2.setText("" + bb++);
 
-            Toast.makeText(MainActivity.this, strCount + "-Re : " + bb, Toast.LENGTH_LONG).show();
             this.sendEmptyMessageDelayed(B_NO, B_DELAY);        // B_DELAY 간격으로 계속해서 반복하게 만들어준다
         }
     };
@@ -206,6 +213,26 @@ public class MainActivity extends AppCompatActivity {
                 stopMp3();
             }
         });
+        btnC = (Button) findViewById(R.id.btnC);
+        btnC.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this,R.style.MyDialogTheme);
+
+                dialog.setTitle("test");
+                dialog.setMessage("message");
+                dialog.setCancelable(false);
+                dialog.setPositiveButton("abc",new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
+
+            }
+        });
+
 
 
         tvResult = (TextView) findViewById(R.id.tvResult);
@@ -221,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (strCount.equals("1") || strCount.equals("2") || strCount.equals("3") || strCount.equals("4") || strCount.equals("5")) {
+                    callNotification();
                     playMp3();
                     startVib();
 
@@ -242,13 +270,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    aHanUrl = webView.getUrl();
+
                     tvResult.setText("start!");
                     aHandler.sendEmptyMessage(A_NO);
-                    bHandler.sendEmptyMessage(B_NO);
+//                    bHandler.sendEmptyMessage(B_NO);
                 } else {
                     tvResult.setText("STOP..");
                     aHandler.removeMessages(A_NO);
-                    bHandler.removeMessages(B_NO);
+//                    bHandler.removeMessages(B_NO);
                 }
             }
         });
@@ -260,6 +290,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
 
+                    callNotification();
                     playMp3();
                     startVib();
 
@@ -268,7 +299,6 @@ public class MainActivity extends AppCompatActivity {
 
                     startWebView(webView.getUrl());
 
-                    cboxWeb.setText("Web");
 
 //                    String userAgent = webView.getSettings().getUserAgentString().replace("Mobile ","");
 //                    webView.getSettings().setUserAgentString(userAgent);
@@ -284,7 +314,6 @@ public class MainActivity extends AppCompatActivity {
                     webView.getSettings().setUserAgentString(userAgent);
 
                     startWebView(webView.getUrl());
-                    cboxWeb.setText("Mob");
 
 //                    String userAgent = webView.getSettings().getUserAgentString().replace("Mozila ", "");
 //                    webView.getSettings().setUserAgentString(userAgent);
@@ -462,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void myHtml() {
+    public void myHtml(String url) {
 
 
 //        WebView webView = new WebView(this);
@@ -481,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
         webView.addJavascriptInterface(new MyJavascriptInterface(), "Android");
 
 
-        webView.loadUrl(webView.getUrl());
+        webView.loadUrl(url);
 
 
     }
@@ -495,6 +524,50 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void callNotification() {
+
+
+        Resources res = getResources();
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("notificationId", 9999); //전달할 값
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+        builder.setContentTitle("알람") //상태바 드래그시 보이는 타이틀
+                .setContentText("알람이 왔다.") //상태바 드래그시 보이는 서브타이틀
+                .setTicker("News!") //상태바 한줄 메시지
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setLargeIcon(BitmapFactory.decodeResource(res, R.mipmap.ic_launcher))
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+//                .setOngoing(true)
+                .setNumber(1)
+                .setWhen(System.currentTimeMillis())
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
+
+
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            builder.setCategory(Notification.CATEGORY_MESSAGE)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .setVisibility(Notification.VISIBILITY_PUBLIC);
+        }
+
+        Bitmap bigPicture = BitmapFactory.decodeResource(getResources(), R.drawable.abs);
+
+        NotificationCompat.BigPictureStyle bigStyle = new NotificationCompat.BigPictureStyle(builder);
+        bigStyle.setBigContentTitle("bigpicture Expanded Title");
+        bigStyle.setSummaryText("bigpicture Expanded Message");
+        bigStyle.bigPicture(bigPicture);
+
+        builder.setStyle(bigStyle);
+
+
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        nm.notify(1234, builder.build());
+    }
 /*
     class MyThread extends Thread {
         @Override

@@ -13,4 +13,10 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+
+    <!--Dialog-->
+    <style name="MyDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+        <item name="android:background">#153b2a</item>
+    </style>
+
 </resources>

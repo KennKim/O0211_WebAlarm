@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
@@ -35,6 +36,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,11 +52,17 @@ public class MainActivity extends AppCompatActivity {
     private SwipeRefreshLayout swipeRefreshLayout;
 
     private String strCount = "";
+    private String strVs = "1";
 
     private WebView webView;
     private ProgressDialog proDialog;
 
     private EditText etSearch;
+    private RadioButton rab0;
+    private RadioButton rab1;
+    private RadioButton rab2;
+    private RadioButton rab3;
+    private RadioButton rab4;
     private Button btnGo;
     private Button btnGetHtml;
     private Button btnStop;
@@ -93,11 +101,16 @@ public class MainActivity extends AppCompatActivity {
 
             // 할일들을 여기에 등록
             tvGetUrl.setText(webView.getUrl());
-            tvNo.setText("" + aa++);
+            tvNo.setText("" + (++aa));
             myHtml(aHanUrl);
             tvResult.setText(strCount);
 
-            Toast.makeText(MainActivity.this, strCount + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
+            setCustomToast(MainActivity.this, "" + aa);
+//            Toast.makeText(MainActivity.this, strCount + "-aHandler : " + aa, Toast.LENGTH_LONG).show();
+//            Toast toast = Toast.makeText(MainActivity.this, strCount + "-aHandler : " + aa, Toast.LENGTH_SHORT);
+//            toast.setGravity(Gravity.CENTER_VERTICAL, 50, 50);
+//            toast.show();
+
             this.sendEmptyMessageDelayed(A_NO, A_DELAY);        // A_DELAY 간격으로 계속해서 반복하게 만들어준다
         }
     };
@@ -205,6 +218,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        rab0 = (RadioButton) findViewById(R.id.rab0);
+        rab0.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                strVs = "0";
+            }
+        });
+        rab1 = (RadioButton) findViewById(R.id.rab1);
+        rab1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                strVs = "1";
+            }
+        });
+        rab2 = (RadioButton) findViewById(R.id.rab2);
+        rab2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                strVs = "2";
+            }
+        });
+        rab3 = (RadioButton) findViewById(R.id.rab3);
+        rab3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                strVs = "3";
+            }
+        });
+        rab4 = (RadioButton) findViewById(R.id.rab4);
+        rab4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                strVs = "4";
+            }
+        });
+        rab1.setChecked(true);
+
 
         btnStop = (Button) findViewById(R.id.btnStop);
         btnStop.setOnClickListener(new View.OnClickListener() {
@@ -217,12 +267,12 @@ public class MainActivity extends AppCompatActivity {
         btnC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this,R.style.MyDialogTheme);
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this, R.style.MyDialogTheme);
 
                 dialog.setTitle("test");
                 dialog.setMessage("message");
                 dialog.setCancelable(false);
-                dialog.setPositiveButton("abc",new DialogInterface.OnClickListener() {
+                dialog.setPositiveButton("abc", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -232,7 +282,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
 
 
         tvResult = (TextView) findViewById(R.id.tvResult);
@@ -247,8 +296,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                if (strCount.equals("1") || strCount.equals("2") || strCount.equals("3") || strCount.equals("4") || strCount.equals("5")) {
-                    callNotification();
+                if (strCount.equals(strVs)) {
+//                    callNotification();
                     playMp3();
                     startVib();
 
@@ -406,10 +455,10 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        } else {
         }
 
     }
+
 
     public void stopMp3() {
         try {
@@ -526,12 +575,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void callNotification() {
 
-
         Resources res = getResources();
 
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(MainActivity.this, MainActivity.class);
         intent.putExtra("notificationId", 9999); //전달할 값
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
@@ -546,7 +594,6 @@ public class MainActivity extends AppCompatActivity {
                 .setNumber(1)
                 .setWhen(System.currentTimeMillis())
                 .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE);
-
 
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -568,6 +615,37 @@ public class MainActivity extends AppCompatActivity {
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         nm.notify(1234, builder.build());
     }
+
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Toast.makeText(MainActivity.this, " onNewIntent ", Toast.LENGTH_LONG).show();
+
+    }
+
+    /**
+     * 토스트 설정
+     */
+    public static void setCustomToast(Context context, String msg) {
+        TextView tv = new TextView(context);
+        tv.setText(msg);
+        tv.setBackgroundResource(R.drawable.number_shape);
+        tv.setTextColor(Color.RED);
+        tv.setTextSize(10);
+
+        final Toast toast = Toast.makeText(context, "", Toast.LENGTH_SHORT);
+        toast.setView(tv);
+        toast.show();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                toast.cancel();
+            }
+        }, 1000);
+    }
+
 /*
     class MyThread extends Thread {
         @Override

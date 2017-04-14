@@ -15,18 +15,21 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.Ringtone;
 import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.NotificationCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -37,8 +40,11 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.thread.webalarm.o0211_webalarm.setting.SettingsActivity;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -47,6 +53,7 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
 
+    private ActionBar actionBar;
     private BackPressCloseHandler backPressCloseHandler;
     private Dialog mMainDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -58,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog proDialog;
 
     private EditText etSearch;
+    private RadioGroup radioGroup;
     private RadioButton rab0;
     private RadioButton rab1;
     private RadioButton rab2;
@@ -80,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "tag";
     private final String HTML = "myHtml";
 
+    private Ringtone ringtone;
     private MediaPlayer mp;
     private Vibrator vib;
 
@@ -135,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         backPressCloseHandler = new BackPressCloseHandler(this);
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_layout);
@@ -178,9 +188,11 @@ public class MainActivity extends AppCompatActivity {
 //        MyThread myThread = new MyThread();
 //        myThread.start();
 
+        RingtoneManager ringtoneManager = new RingtoneManager(this);
+        ringtone = ringtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
 
-        mp = MediaPlayer.create(MainActivity.this, R.raw.sound_sky);
-        mp.setAudioStreamType(AudioManager.STREAM_RING);
+//        mp = MediaPlayer.create(MainActivity.this, R.raw.sound_sky);
+//        mp.setAudioStreamType(AudioManager.STREAM_RING);
 
         vib = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -218,6 +230,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
+        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+
+
+                rab0.setBackgroundResource(R.drawable.shape_corner_pink);
+                rab1.setBackgroundResource(R.drawable.shape_corner_pink);
+                rab2.setBackgroundResource(R.drawable.shape_corner_pink);
+                rab3.setBackgroundResource(R.drawable.shape_corner_pink);
+                rab4.setBackgroundResource(R.drawable.shape_corner_pink);
+
+
+                if (checkedId == R.id.rab0) {
+                    rab0.setBackgroundResource(R.drawable.shape_solid_pink);
+                    strVs = "0";
+                } else if (checkedId == R.id.rab1) {
+                    rab1.setBackgroundResource(R.drawable.shape_solid_pink);
+                    strVs = "1";
+                } else if (checkedId == R.id.rab2) {
+                    rab2.setBackgroundResource(R.drawable.shape_solid_pink);
+                    strVs = "2";
+                } else if (checkedId == R.id.rab3) {
+                    rab3.setBackgroundResource(R.drawable.shape_solid_pink);
+                    strVs = "3";
+                } else if (checkedId == R.id.rab4) {
+                    rab4.setBackgroundResource(R.drawable.shape_solid_pink);
+                    strVs = "4";
+                }
+            }
+        });
+
+
         rab0 = (RadioButton) findViewById(R.id.rab0);
         rab0.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -253,18 +299,26 @@ public class MainActivity extends AppCompatActivity {
                 strVs = "4";
             }
         });
-        rab1.setChecked(true);
+        radioGroup.check(R.id.rab1);
 
 
-        btnStop = (Button) findViewById(R.id.btnStop);
-        btnStop.setOnClickListener(new View.OnClickListener() {
+        btnStop = (Button)
+
+                findViewById(R.id.btnStop);
+        btnStop.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 stopMp3();
             }
         });
-        btnC = (Button) findViewById(R.id.btnC);
-        btnC.setOnClickListener(new View.OnClickListener() {
+        btnC = (Button)
+
+                findViewById(R.id.btnC);
+        btnC.setOnClickListener(new View.OnClickListener()
+
+        {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this, R.style.MyDialogTheme);
@@ -309,13 +363,25 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        tvGetUrl = (TextView) findViewById(R.id.tvGetUrl);
-        tvNo = (TextView) findViewById(R.id.tvNo);
-        tvNo2 = (TextView) findViewById(R.id.tvNo2);
+        tvGetUrl = (TextView)
+
+                findViewById(R.id.tvGetUrl);
+
+        tvNo = (TextView)
+
+                findViewById(R.id.tvNo);
+
+        tvNo2 = (TextView)
+
+                findViewById(R.id.tvNo2);
 
 
-        cboxZero = (CheckBox) findViewById(R.id.cboxZero);
-        cboxZero.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        cboxZero = (CheckBox)
+
+                findViewById(R.id.cboxZero);
+        cboxZero.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+
+        {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -333,8 +399,12 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        cboxWeb = (CheckBox) findViewById(R.id.cboxWeb);
-        cboxWeb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        cboxWeb = (CheckBox)
+
+                findViewById(R.id.cboxWeb);
+        cboxWeb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+
+        {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -372,6 +442,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu1, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // finish the activity
+                onBackPressed();
+                return true;
+            case R.id.m1:
+                Toast.makeText(MainActivity.this, "m1", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
+            case R.id.m2:
+                Toast.makeText(MainActivity.this, "m2", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     @Override
     public void onBackPressed() {
@@ -444,6 +539,13 @@ public class MainActivity extends AppCompatActivity {
 //        am.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE
 
         if (am.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+
+
+            ringtone.play();
+
+
+
+/*
             Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             try {
                 if (!mp.isPlaying()) {
@@ -454,14 +556,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-            }
+            }*/
         }
 
     }
 
 
     public void stopMp3() {
-        try {
+
+        ringtone.stop();
+
+        /*try {
             if (mp.isPlaying()) {
                 mp.stop();
                 mp.release();
@@ -469,7 +574,14 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
+    }
+
+    private void setRabOn(int i) {
+
+    }
+
+    private void setRabOff() {
     }
 
     public void startVib() {
@@ -571,6 +683,7 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(html);
             strCount = html.trim();
         }
+
     }
 
     public void callNotification() {
@@ -630,7 +743,7 @@ public class MainActivity extends AppCompatActivity {
     public static void setCustomToast(Context context, String msg) {
         TextView tv = new TextView(context);
         tv.setText(msg);
-        tv.setBackgroundResource(R.drawable.number_shape);
+        tv.setBackgroundResource(R.drawable.shape_corner_pink);
         tv.setTextColor(Color.RED);
         tv.setTextSize(10);
 

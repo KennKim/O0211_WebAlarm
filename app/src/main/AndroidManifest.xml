@@ -24,9 +24,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ABC"
-            android:theme="@style/AppTheme"/>
-
+        <activity
+            android:name=".setting.SettingsActivity"
+            android:theme="@style/AppTheme"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
         <service
             android:name=".ServiceWithWebview"
             android:label="@string/service_name"/>

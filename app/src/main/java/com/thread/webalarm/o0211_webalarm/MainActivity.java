@@ -265,68 +265,30 @@ public class MainActivity extends AppCompatActivity {
 
 
         rab0 = (RadioButton) findViewById(R.id.rab0);
-        rab0.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                strVs = "0";
-            }
-        });
         rab1 = (RadioButton) findViewById(R.id.rab1);
-        rab1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                strVs = "1";
-            }
-        });
         rab2 = (RadioButton) findViewById(R.id.rab2);
-        rab2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                strVs = "2";
-            }
-        });
         rab3 = (RadioButton) findViewById(R.id.rab3);
-        rab3.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                strVs = "3";
-            }
-        });
         rab4 = (RadioButton) findViewById(R.id.rab4);
-        rab4.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                strVs = "4";
-            }
-        });
         radioGroup.check(R.id.rab1);
 
 
-        btnStop = (Button)
-
-                findViewById(R.id.btnStop);
-        btnStop.setOnClickListener(new View.OnClickListener()
-
-        {
+        btnStop = (Button) findViewById(R.id.btnStop);
+        btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stopMp3();
             }
         });
-        btnC = (Button)
-
-                findViewById(R.id.btnC);
-        btnC.setOnClickListener(new View.OnClickListener()
-
-        {
+        btnC = (Button) findViewById(R.id.btnC);
+        btnC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this, R.style.MyDialogTheme);
 
-                dialog.setTitle("test");
-                dialog.setMessage("message");
+                dialog.setTitle("Lorem Ipsum?");
+                dialog.setMessage(R.string.ipsum);
                 dialog.setCancelable(false);
-                dialog.setPositiveButton("abc", new DialogInterface.OnClickListener() {
+                dialog.setPositiveButton("o", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -354,7 +316,6 @@ public class MainActivity extends AppCompatActivity {
 //                    callNotification();
                     playMp3();
                     startVib();
-
                 } else {
 //                    Toast.makeText(MainActivity.this, "stopMp3", Toast.LENGTH_SHORT).show();
                     stopMp3();
@@ -363,25 +324,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        tvGetUrl = (TextView)
+        tvGetUrl = (TextView) findViewById(R.id.tvGetUrl);
 
-                findViewById(R.id.tvGetUrl);
+        tvNo = (TextView) findViewById(R.id.tvNo);
 
-        tvNo = (TextView)
-
-                findViewById(R.id.tvNo);
-
-        tvNo2 = (TextView)
-
-                findViewById(R.id.tvNo2);
+        tvNo2 = (TextView) findViewById(R.id.tvNo2);
 
 
-        cboxZero = (CheckBox)
-
-                findViewById(R.id.cboxZero);
-        cboxZero.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-
-        {
+        cboxZero = (CheckBox) findViewById(R.id.cboxZero);
+        cboxZero.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -399,12 +350,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        cboxWeb = (CheckBox)
-
-                findViewById(R.id.cboxWeb);
-        cboxWeb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-
-        {
+        cboxWeb = (CheckBox) findViewById(R.id.cboxWeb);
+        cboxWeb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {

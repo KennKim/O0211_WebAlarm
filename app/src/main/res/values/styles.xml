@@ -16,7 +16,7 @@
 
     <!--Dialog-->
     <style name="MyDialogTheme" parent="Theme.AppCompat.DayNight.Dialog.Alert">
-        <item name="android:background">#153b2a</item>
+        <item name="android:background">#022515</item>
     </style>
 
 
